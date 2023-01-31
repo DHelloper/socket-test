@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function enter() {
+            var name = document.getElementById("name").value
+
+            const genderNodeList
+                = document.getElementsByName('type');
+            var type = null;
+            genderNodeList.forEach((node) => {
+                if (node.checked) {
+                    type = node.value;
+                }
+            });
+            var Mode = document.getElementById("Mode").value
+            var MMR = document.getElementById("MMR").value
+            var id = document.getElementById("id").value
+            var basic_address = "localhost:8080"
+            // var basic_address = "43.201.118.242:8080"
+            location.href = `http://${basic_address}/chat?name=${name}&type=${type}&MMR=${MMR}&Mode=${Mode}&id=${id}`
+            // axios.get().then()
+        }
+    </script>
+</head>
+<body>
+<h1>웹소캣 테스트</h1>
+이름 : <input id="name">
+<input type="radio" name="type" value="판매자">판매자
+<input type="radio" name="type" value="고객" checked="checked">고객
+<br>
+Mode : <input id="Mode">
+MMR : <input id="MMR">
+ID : <input id="id">
+langauge: <input id="language">
+<button onclick="enter()">입장</button>
+</body>
+</html>

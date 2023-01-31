@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>웹소켓 테스트</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        var g_webSocket = null;
+        var my_id = null;
+        var my_type = null;
+        var basic_address = "localhost:8080"
+        // var basic_address = "43.201.118.242:8080"
+
+        var websocket_address = "ws://" + basic_address + "/websocket";
+        window.onload = async function () {
+
+            // g_webSocket = await new WebSocket("ws://43.201.118.242:8080/websocket");
+            g_webSocket = new WebSocket(websocket_address);
+
+            // setInterval(() => reload(), 2000);
+
+            /**
+             * 웹소켓 사용자 연결 성립하는 경우 호출
+             */
+            g_webSocket.onopen = function (message) {
+                addLineToChatBox("Server is connected.");
+                const searchParams = new URLSearchParams(location.search);
+                const name = searchParams.get("name");
+                const type = searchParams.get("type");
+                const mode = searchParams.get("Mode");
+                const mmr = searchParams.get("MMR");
+                const id = searchParams.get("id");
+                my_id = id;
+                my_type = type;
+
+                // 처음 접속할땐 name, 타입 보내기
+                const data = JSON.stringify(
+                    {
+                        'method': 'init', 'name': name, 'type': type, 'Mode':
+                        mode, 'MMR': mmr, 'id': id
+                    }
+                );
+                console.log(`연결 요청 보냄 ${name} `)
+                g_webSocket.send(data);
+            }
+
+            /**
+             * 웹소켓 메시지(From Server) 수신하는 경우 호출
+             */
+            g_webSocket.onmessage = function (message) {
+                // console.log(`서버로부터 응답받은 것! ${message}`)
+                console.log(`서버로부터 응답받은 것! ${message.data}`)
+                const data = JSON.parse(message.data)
+                console.log(`서버로부터 응답받은 것! ${data.method}`)
+
+                if(data.method == 'msg'){
+                    addLineToChatBox(data.content);
+                }else{
+                    // window.open()
+                    location.replace('https://webgyver.site/');
+                }
+            };
+
+            /**
+             * 웹소켓 사용자 연결 해제하는 경우 호출
+             */
+            g_webSocket.onclose = function (message) {
+                addLineToChatBox("Server is disconnected.");
+            };
+
+            /**
+             * 웹소켓 에러 발생하는 경우 호출
+             */
+            g_webSocket.onerror = function (message) {
+                addLineToChatBox("Error!");
+            };
+        }
+
+        /**
+         * 채팅 박스영역에 내용 한 줄 추가
+         */
+        function addLineToChatBox(_line) {
+            if (_line == null) {
+                _line = "";
+            }
+
+            var chatBoxArea = document.getElementById("chatBoxArea");
+            chatBoxArea.value += _line + "\n";
+            chatBoxArea.scrollTop = chatBoxArea.scrollHeight;
+        }
+
+        /**
+         * Send 버튼 클릭하는 경우 호출 (서버로 메시지 전송)
+         */
+        function sendButton_onclick() {
+            var inputMsgBox = document.getElementById("inputMsgBox");
+            if (inputMsgBox == null || inputMsgBox.value == null || inputMsgBox.value.length == 0) {
+                return false;
+            }
+
+            var chatBoxArea = document.getElementById("chatBoxArea");
+
+            if (g_webSocket == null || g_webSocket.readyState == 3) {
+                chatBoxArea.value += "Server is disconnected.\n";
+                return false;
+            }
+
+            // 서버로 메시지 전송
+            g_webSocket.send(JSON.stringify({'method': 'msg', 'msg': inputMsgBox.value}));
+            inputMsgBox.value = "";
+            inputMsgBox.focus();
+
+            return true;
+        }
+
+        /**
+         * Disconnect 버튼 클릭하는 경우 호출
+         */
+        function disconnectButton_onclick() {
+            if (g_webSocket != null) {
+                g_webSocket.close();
+            }
+        }
+
+        /**
+         * inputMsgBox 키입력하는 경우 호출
+         */
+        function inputMsgBox_onkeypress() {
+            if (event == null) {
+                return false;
+            }
+
+            // 엔터키 누를 경우 서버로 메시지 전송
+            var keyCode = event.keyCode || event.which;
+            if (keyCode == 13) {
+                sendButton_onclick();
+            }
+        }
+
+        function get_session_list() {
+            var inputMsgBox = document.getElementById("userList");
+            axios
+                .get("http://localhost:8080/api/session/list")
+                .then(function (result) {
+                    console.log(result);
+
+                    inputMsgBox.value = result.data + "\n";
+                })
+
+                .catch(function (error) {
+
+                    console.log("에러 발생 : ", error);
+
+                });
+        }
+
+        // function get_customer_list() {
+        //     var custoemr_list = document.getElementById("customer_list");
+        //     if (my_type == '고객') {
+        //         var tr = '';
+        //         tr += '<tr>';
+        //         tr += '  <td>' + '너' + '</td>';
+        //         tr += '  <td>' + '는' + '</td>';
+        //         tr += '  <td>' + '고' + '</td>';
+        //         tr += '  <td>' + '객' + '</td>';
+        //         tr += '  <td>' + '임' + '</td>';
+        //         custoemr_list.innerHTML = tr;
+        //         return null;
+        //     }
+        //     axios
+        //         .get("http://" + basic_address + "/api/customer/list/" + my_id)
+        //         .then(function (result) {
+        //             // console.log(result.data);
+        //             var data = result.data;
+        //             var trList = '';
+        //             for (var i = 0; i < data.length; i++) {
+        //                 var row = data[i];
+        //                 var tr = '';
+        //                 tr += '<tr>';
+        //                 tr += '  <td>' + row.id + '</td>';
+        //                 tr += '  <td>' + row.name + '</td>';
+        //                 tr += '  <td>' + row.wido + '</td>';
+        //                 tr += '  <td>' + row.gyungdo + '</td>';
+        //                 tr += '  <td>' + row.dis + '</td>';
+        //                 tr += '  <td>' + `<button onclick="go_webrtc('${row.id}')">수락</button>` + '</td>';
+        //                 tr += '</tr>';
+        //                 trList += tr;
+        //             }
+        //             // console.log(trList);
+        //             custoemr_list.innerHTML = trList;
+        //         })
+        //
+        //         .catch(function (error) {
+        //
+        //             console.log("에러 발생 : ", error);
+        //
+        //         });
+        // }
+
+        async function go_webrtc(id) {
+            console.log("ok");
+            // g_webSocket.send(JSON.stringify({'method': 'msg', 'msg': id+"님의 요청글을 " + my_id+"님이 OK를 눌렀어용 "}));
+            g_webSocket.send(JSON.stringify({'method': 'go', 'customer': id, 'seller': my_id}));
+        }
+
+        // function get_seller_list() {
+        //     var inputMsgBox = document.getElementById("seller_list");
+        //     axios
+        //         .get("http://" + basic_address + "/api/seller/list")
+        //         .then(function (result) {
+        //             var data = result.data;
+        //             var ih = '';
+        //             for (var i = 0; i < data.length; i++) {
+        //                 ih += data[i];
+        //             }
+        //             inputMsgBox.innerHTML = ih;
+        //         })
+        //         .catch(function (error) {
+        //             console.log("에러 발생 : ", error);
+        //         });
+        //
+        // }
+        //
+        // function reload() {
+        //     get_customer_list();
+        //     get_seller_list();
+        // }
+
+
+    </script>
+</head>
+<body>
+
+<input id="inputMsgBox" style="width: 250px;" type="text" onkeypress="inputMsgBox_onkeypress()">
+<input id="sendButton" value="Send" type="button" onclick="sendButton_onclick()">
+<input id="disconnectButton" value="Disconnect" type="button" onclick="disconnectButton_onclick()">
+<br/>
+<textarea id="chatBoxArea" style="width: 100%;" rows="10" cols="50" readonly="readonly"></textarea>
+<br/>
+
+<div>
+    <h1>고객 리스트</h1>
+    <table style="border:1px">
+        <thead>
+        <td>ID</td> <!-- cell -->
+        <td>이름</td> <!-- cell -->
+        <td>위도</td> <!-- cell -->
+        <td>경도</td> <!-- cell -->
+        <td>거리</td> <!-- cell -->
+        <td>수락</td>
+        </thead>
+        <tbody id="customer_list">
+        </tbody>
+
+    </table>
+
+</div>
+
+<div>
+
+    <h1>판매자 리스트</h1>
+    <label id="seller_list"></label>
+</div>
+
+<!--<textarea id="userList" style="width: 100%;" rows="10" cols="50" readonly="readonly"></textarea>-->
+<!--<button onclick="reload_user_list()">강제 갱신</button>-->
+</body>
+</html>
