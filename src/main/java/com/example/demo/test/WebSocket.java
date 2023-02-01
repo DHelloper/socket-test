@@ -105,12 +105,13 @@ public class WebSocket {
                 userSet.add(id);
                 userMap.put(id, user);
                 sessionId2Obj.put(session.getId(), user);
-                for(int i=0; i< userMap.size(); i++){
+                for(int i=0; i< sessionMap.size(); i++){
 //                    System.out.println(i+"바퀴째");
-                    System.out.println(sessionId2Obj.get(i+"").mmr);
-                    if(sessionId2Obj.size()>1&&((sessionId2Obj.get(i+"").mmr - 30 <= mmr) && (mmr <= sessionId2Obj.get(i+"").mmr + 30 )))
+//                    System.out.println(sessionId2Obj.containsKey(i) && sessionId2Obj.get(i+"").mmr);
+                    if((sessionId2Obj.size()>1 && sessionId2Obj.containsKey(i+"")) &&((sessionId2Obj.get(i+"").mmr - 30 <= mmr) && (mmr <= sessionId2Obj.get(i+"").mmr + 30 )))
                     {
-//                        System.out.println(sessionId2Obj.get(i+"").id);
+                        System.out.println(sessionId2Obj.get(i+"").id);
+                        System.out.println(id);
                         if(!sessionId2Obj.get(i+"").id.equals(id))
                         {
                             goWebRTC(sessionId2Obj.get(i+"").id, id);
@@ -129,13 +130,14 @@ public class WebSocket {
                 }
                 sb.append(" : ").append(msg);
                 sendMessageToAll(sb.toString());
-            } else if (method.equals("go")) {
-                System.out.println("입장 요청");
-                String customerId = obj.get("customer").toString();
-                String sellerId = obj.get("seller").toString();
-                System.out.println(String.format("%s 님과 %s 님의 입장 요청", customerId, sellerId));
-                goWebRTC(sellerId, customerId);
             }
+//            else if (method.equals("go")) {
+//                System.out.println("입장 요청");
+//                String customerId = obj.get("customer").toString();
+//                String sellerId = obj.get("seller").toString();
+//                System.out.println(String.format("%s 님과 %s 님의 입장 요청", customerId, sellerId));
+//                goWebRTC(sellerId, customerId);
+//            }
 //            printInfo();
         }
     }
