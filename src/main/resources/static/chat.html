@@ -8,15 +8,15 @@
         var g_webSocket = null;
         var my_id = null;
         var my_type = null;
-        var basic_address = "localhost:8080"
+        var basic_address = "localhost:9111"
         // var basic_address = "43.201.118.242:8080"
 
+        console.log("aaaa");
         var websocket_address = "ws://" + basic_address + "/websocket";
         window.onload = async function () {
-
             // g_webSocket = await new WebSocket("ws://43.201.118.242:8080/websocket");
             g_webSocket = new WebSocket(websocket_address);
-
+            console.log(g_webSocket);
             // setInterval(() => reload(), 2000);
 
             /**
@@ -30,14 +30,21 @@
                 const mode = searchParams.get("Mode");
                 const mmr = searchParams.get("MMR");
                 const id = searchParams.get("id");
+                const language = searchParams.get("Language");
+                console.log("읭 ? "+language);
                 my_id = id;
                 my_type = type;
 
                 // 처음 접속할땐 name, 타입 보내기
                 const data = JSON.stringify(
                     {
-                        'method': 'init', 'name': name, 'type': type, 'Mode':
-                        mode, 'MMR': mmr, 'id': id
+                        'method': 'init',
+                        'name': name,
+                        'type': type,
+                        'Mode': mode,
+                        'MMR': mmr,
+                        'id': id,
+                        'Language' : language
                     }
                 );
                 console.log(`연결 요청 보냄 ${name} `)
@@ -57,6 +64,7 @@
                     addLineToChatBox(data.content);
                 }else{
                     // window.open()
+                    console.log(`이건 뭐지 ? ${data.content}`);
                     location.replace('https://webgyver.site/');
                 }
             };

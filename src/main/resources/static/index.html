@@ -19,9 +19,10 @@
             var Mode = document.getElementById("Mode").value
             var MMR = document.getElementById("MMR").value
             var id = document.getElementById("id").value
+            var Language = document.getElementById("Language").value
             var basic_address = "localhost:8080"
             // var basic_address = "43.201.118.242:8080"
-            location.href = `http://${basic_address}/chat?name=${name}&type=${type}&MMR=${MMR}&Mode=${Mode}&id=${id}`
+            location.href = `http://${basic_address}/chat?name=${name}&type=${type}&MMR=${MMR}&Mode=${Mode}&id=${id}&Language=${Language}`
             // axios.get().then()
         }
     </script>
@@ -35,7 +36,7 @@
 Mode : <input id="Mode">
 MMR : <input id="MMR">
 ID : <input id="id">
-langauge: <input id="language">
+Langauge: <input id="Language">
 <button onclick="enter()">입장</button>
 </body>
 </html>
